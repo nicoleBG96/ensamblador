@@ -1,5 +1,6 @@
 .386
 .model flat, stdcall
+RC4 proto :dword, :dword 
 option casemap : none
 .data
 
@@ -20,14 +21,14 @@ VectorS db 0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
         db 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239
         db 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
         
-VectorT db "SeSaMo",0
+VectorT db "Clave",0
 VectorR db 0 
 .code
 start:
     ;write your code here
     xor eax, eax
-    ret
-    end start
+    invoke RC4, addr VectorS, addr VectorT
+    
 ;RUTINA PRIMER CIFRADO
 ;Desde 0 hasta 255
     ;j = (j +VectorS[i] + VectorT[i])mod 256
@@ -42,5 +43,28 @@ start:
 ;EXPONER VALOR DE S[T]//
 ;k++
 
-
+RC4 proc uses ebx edx ecx eax vecS:dword, clave:dword
+    xor esi, esi ;valor i
+    xor edx, edx ;valor j
+    mov ebx, vecS
+    mov ecx, clave
     
+contar1:
+    mov ah, [ebx+esi]
+    mov al, [ecx]
+    cmp al, 0
+    je salir
+    add al, ah
+    add al, dl
+    mov dl, al
+    mov [ebx+esi], dl
+    xor eax, eax
+    inc esi
+    inc ecx
+    jmp contar1
+    
+salir:
+    ret
+    RC4 endp
+    ret
+    end start
